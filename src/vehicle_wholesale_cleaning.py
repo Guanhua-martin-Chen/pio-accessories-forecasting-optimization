@@ -1,5 +1,6 @@
 """Helpers for parsing the report-style ``Vehicle_Wholesale_Data`` sheet."""
 
+from pathlib import Path
 import re
 
 import pandas as pd
@@ -257,6 +258,31 @@ def split_model_and_total_rows(cleaned_df):
     model_rows = cleaned_df.loc[~cleaned_df["is_total_row"]].copy()
     total_rows = cleaned_df.loc[cleaned_df["is_total_row"]].copy()
     return model_rows, total_rows
+
+
+def save_vehicle_processed_tables(
+    model_rows,
+    total_rows,
+    processed_dir="data/processed",
+):
+    """Save model-level and total-row tables as separate ignored CSV files."""
+    output_dir = Path(processed_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    paths = {
+        "vehicle_model_month": output_dir / "vehicle_model_month.csv",
+        "vehicle_total_month": output_dir / "vehicle_total_month.csv",
+    }
+    model_rows.to_csv(
+        paths["vehicle_model_month"],
+        index=False,
+        date_format="%Y-%m-%d",
+    )
+    total_rows.to_csv(
+        paths["vehicle_total_month"],
+        index=False,
+        date_format="%Y-%m-%d",
+    )
+    return paths
 
 
 def vehicle_cleaning_summaries(cleaned_df):
